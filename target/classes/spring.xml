@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd ">
+	    <!-- 	
+	    ParentRoundAdviceProxy
+		<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+			<property name="target" ref="parent"></property>
+			<property name="interfaces" value="com.wzf.springaop.demo.face.Parent"></property>
+			<property name="interceptorNames" value="parentBAAdviceProxy"></property>
+		</bean> 
+		-->
+		<!--正则验证 -->
+		<bean id="parent" class="com.wzf.springaop.demo.face.impl.ParentImpl"></bean>
+		<bean id="SendMessage" class="com.wzf.springaop.demo.face.impl.SendMessageProxy"></bean>
+		<!-- 
+		<bean id="parentBAAdviceProxy" class="com.wzf.springaop.demo.face.proxy.ParentBAAdviceProxy"></bean>
+		<bean id="parentRoundAdviceProxy" class="com.wzf.springaop.demo.face.proxy.ParentRoundAdviceProxy"></bean>
+		<bean id="regex" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+			<property name="advice" ref="parentRoundAdviceProxy"></property>
+			<property name="pattern" value="com.wzf.springaop.demo.face.impl.ParentImpl.goto.*"></property>
+		</bean> 
+		-->
+		<!--Spring自动AOP-->
+	    <!-- 
+	    	Spring默认的代理	
+		<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+			<property name="optimize" value="true"></property>
+		</bean> 
+		 -->
+		<!-- 
+			基于BeanName的自动代理
+		<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+			<property name="beanNames" value="*ent"></property>
+			<property name="interceptorNames" value="regex"></property>
+			<property name="optimize" value="true"></property>
+		</bean> 
+		-->
+		<!--
+		  ProxyFactoryBean方式实现AOP
+		 <bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+			<property name="target" ref="parent"></property>
+			<property name="interfaces" value="com.wzf.springaop.demo.face.SendMessage"></property>
+			<property name="interceptorNames" value="regex"></property>
+			<property name="proxyTargetClass" value="true"></property>
+		</bean>
+		 -->
+		<!-- 
+			注解模式
+		<context:component-scan base-package="com*" />
+		<aop:aspectj-autoproxy proxy-target-class="true"></aop:aspectj-autoproxy> 
+		
+		-->
+		<bean id="aspectJProxy" class="com.wzf.springaop.demo.face.impl.aspectj.AspectJProxy"></bean>
+		<aop:config>
+			<aop:aspect ref="aspectJProxy">
+				<aop:declare-parents types-matching="com.wzf.springaop.demo.face.impl.ParentImpl" implement-interface="com.wzf.springaop.demo.face.SendMessage" default-impl="com.wzf.springaop.demo.face.impl.SendMessageProxy"/>
+				<aop:around method="around" pointcut="execution(* com.wzf.springaop.demo.face.impl.ParentImpl.goto*(..))"/>
+			</aop:aspect>
+		</aop:config>
+</beans>
